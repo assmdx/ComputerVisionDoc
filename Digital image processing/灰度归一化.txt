@@ -1,0 +1,12 @@
+file_path =  'C:\Users\gn\Desktop\code\test2.jpg';% 图像文件夹路径 
+oriImage = imread(file_path); %读取原始图像
+
+grayImg = rgb2gray(oriImage); %转为灰度图像  
+figure;
+imshow(grayImg); %figure1
+title('灰度图像');
+
+img3 = mat2gray(grayImg); %灰度图像归一化 https://blog.csdn.net/llxue0925/article/details/80431648
+figure;
+imshow(img3); %figure2
+title('灰度归一化图像');
