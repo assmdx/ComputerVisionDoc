@@ -1,6 +1,6 @@
 # openpose
 
-## [论文](.\openpose.pdf)
+## [论文](openpose.pdf)
 
 ## [实现代码](https://github.com/ZheC/Realtime_Multi-Person_Pose_Estimation)
 
