@@ -159,6 +159,22 @@ $p(u) = (1-u) \bullet d_{j1} + ud_{j2}$										 (11)
 
 正式地，我们首先得到一个多人的候选身体检测部位的集合$D_J$，$D_J = \{ d_j^m : for \ j \in \{1...J\},m \in \{1...N_j\}\}$,$N_j$代表身体部位j的候选个数，$d_j^m \in R^2$ 为身体部位j的第m个候选检测。这些检测的候选部位需要与同一个人的其他候选部位连接，换句话说，我们需要找到成对的身体检测，保证它们实际上是连接着的肢体。我们定义了一个变量 $z_{j1j2}^{mn} \in \{0,1\}$ 用来表示候选检测身体部位 $d_{j1}^m$ 和$d_{j2}^n$是否是真正的连接，目标是为了找到对于所有可能的连接的最佳匹配，$Z=\{ z_{j1j2}^{mn} : for \ j \in \{1...J\},m \in \{1...N_{j1}\},n \in \{1...N_{j2}\}\}$ .
 
+如果我们考虑单独的第c个肢体的一对身体部位，$j1​$和$j2​$(例如颈部和右臀)，找到最佳匹配就简化成了一个二分图的最大匹配问题[32]。这种情况如图Figure 5b中所示。在这个图匹配的问题中，图上的节点都是候选的身体检测部位$D_{j1}​$和$D_{j2}​$,边是候选身体部位之间的全部可能的连接。另外，每一条边由公式（10）加权，即部分亲和力。二分图的一个匹配是找到一个子集，在子集中任意两条边没有公共点。我们的目标就是在被选择的变中找到一个拥有最大权值的匹配，
+
+$max_{Z_c}E_c = max_{Z_c}\sum_{m\in D_{j1}} \sum _{n \in D_{j2}}E_{mn}\bullet z_{j1j2}^{mn} $                                     (12)
+
+$s.t.             \forall m\in D_{j1} ,\sum _{n \in D_{j2}} z_{j1j2}^{mn}  \le 1,$                                                                (13)
+
+$s.t.             \forall n\in D_{j2} ,\sum _{m \in D_{j1}} z_{j1j2}^{mn}  \le 1,$                                                                (14)
+
+$E_c$是肢体c的匹配的总权值，$Z_c$是肢体c相对于$Z$的子集，$E_{mn}$是身体部分$d_{j1}^m$和$d_{j2}^n$之间的亲和力，如公式 （10）定义。公式（13）和公式(14)要求不存在有共同点的两条边，即不可能有同种类型的肢体的两个公用一个身体部位。我们可以用匈牙利算法[14]去获得一个最优匹配。
+
+当遇到要找多人的全身身体姿势时，决定了$Z$是一个K分图匹配问题。这是一个np问题，有很多松弛方法存在。在我们的工作中，我们对最佳匹配添加了两个松弛，针对我们的问题。首先，我们选择最少数量的边来获得人体姿势的生成树骨架，如Figure 6c所示。其次,我们将寻找骨架匹配的问题分解卫了一组二分匹配的问题，并且规定相邻树节点中的匹配相互独立，如Figure 6d所示。我们在3.1节中显示了详细的比较结果，证明了是最小的计算成本并且贪心推理很好地近似逼近全局解决方案。原因是相邻树节点之间的关系被PAF显式建立，但在内部，不相邻的树节点之间由CNN隐式建模。出现这个性质的原因是CNN受到大的感知场训练，并且非相邻树节点的PAF也影响PAF的预测。
+
+在有这两个松弛的情况下，优选可以简化为：
+
+$max_{Z}E = \sum _{c=1}^C max_{Z_c}E_c$                                                                              （15）
+
 
 
 ## 笔记
@@ -188,3 +204,10 @@ Hungarian algorithm算法具体内容？
 We speculatethe reason is that the pair-wise association scores implicitly
 encode global context, due to the large receptive field of the
 PAF network.？？
+
+二分图最大匹配？
+
+匈牙利算法？？？
+
+The reason is that the relationship between adjacent tree nodes is modeled explicitly by PAFs, but internally, the relationship between nonadjacent tree nodes is implicitly modeled by the CNN. This property
+emerges because the CNN is trained with a large receptive field, and PAFs from non-adjacent tree nodes also influence the predicted PAF？？？
