@@ -4,7 +4,7 @@
 
 ## [实现代码](https://github.com/ZheC/Realtime_Multi-Person_Pose_Estimation)
 
-## 中文翻译
+## [中文翻译](openpose_zh_CN.pdf)
 
 ## Abstract
 
@@ -125,7 +125,7 @@ $L_{c,k}^* = \begin{equation}
 		0 \ otherwise.\\
              \end{array}
 \right.
-\end{equation}$                                                                    (8)
+\end{equation}$                                                                     (8)
 
 这里，$v=(x_{j2,k} - x_{j1,k})/\parallel x_{j2,k}-x_{j1,k}\parallel_2$是肢体方向上的单位向量。肢体上的点定义为在指定阈值内的点，这些p点：
 
@@ -137,7 +137,7 @@ $0\le v \bullet (p - x_{j1,k}) \le l_{c,k}  \ and  \  \mid v_{\perp} \bullet (p-
 
 $L_{c}^*(p) = \frac {1} {n_c(p)} \sum _k L_{c,k}^*(p)$                                                                                   (9)
 
-$n_c(p)$表示在p点的经过k个人的肢体的非零向量 （不同人肢体重叠的像素的平均）
+$n_c(p)$表示在p点的经过k个人的肢体c的非零向量 （不同人肢体重叠的像素的平均）
 
 在测试时，我们通过计算连接候选身份部分位置的线积分来测量检测到的候选身体部分的连接。换句话说，我们测量PAF的对齐的线，即连接检测到的身体部分之间的线。特别地，对于两个候选的身体部位$d_{j1}$$d_{j2}$ ，我们将预测的部分亲和力简化，$L_c$ 沿着线分割去测量它们之间连接的可能性。
 
@@ -159,7 +159,7 @@ $p(u) = (1-u) \bullet d_{j1} + ud_{j2}$										 (11)
 
 正式地，我们首先得到一个多人的候选身体检测部位的集合$D_J$，$D_J = \{ d_j^m : for \ j \in \{1...J\},m \in \{1...N_j\}\}$,$N_j$代表身体部位j的候选个数，$d_j^m \in R^2$ 为身体部位j的第m个候选检测。这些检测的候选部位需要与同一个人的其他候选部位连接，换句话说，我们需要找到成对的身体检测，保证它们实际上是连接着的肢体。我们定义了一个变量 $z_{j1j2}^{mn} \in \{0,1\}$ 用来表示候选检测身体部位 $d_{j1}^m$ 和$d_{j2}^n$是否是真正的连接，目标是为了找到对于所有可能的连接的最佳匹配，$Z=\{ z_{j1j2}^{mn} : for \ j \in \{1...J\},m \in \{1...N_{j1}\},n \in \{1...N_{j2}\}\}$ .
 
-如果我们考虑单独的第c个肢体的一对身体部位，$j1​$和$j2​$(例如颈部和右臀)，找到最佳匹配就简化成了一个二分图的最大匹配问题[32]。这种情况如图Figure 5b中所示。在这个图匹配的问题中，图上的节点都是候选的身体检测部位$D_{j1}​$和$D_{j2}​$,边是候选身体部位之间的全部可能的连接。另外，每一条边由公式（10）加权，即部分亲和力。二分图的一个匹配是找到一个子集，在子集中任意两条边没有公共点。我们的目标就是在被选择的变中找到一个拥有最大权值的匹配，
+如果我们考虑单独的第c个肢体的一对身体部位，$j1$和$j2$(例如颈部和右臀)，找到最佳匹配就简化成了一个二分图的最大匹配问题[32]。这种情况如图Figure 5b中所示。在这个图匹配的问题中，图上的节点都是候选的身体检测部位$D_{j1}$和$D_{j2}$,边是候选身体部位之间的全部可能的连接。另外，每一条边由公式（10）加权，即部分亲和力。二分图的一个匹配是找到一个子集，在子集中任意两条边没有公共点。我们的目标就是在被选择的变中找到一个拥有最大权值的匹配，
 
 $max_{Z_c}E_c = max_{Z_c}\sum_{m\in D_{j1}} \sum _{n \in D_{j2}}E_{mn}\bullet z_{j1j2}^{mn} $                                     (12)
 
@@ -175,7 +175,127 @@ $E_c$是肢体c的匹配的总权值，$Z_c$是肢体c相对于$Z$的子集，$E
 
 $max_{Z}E = \sum _{c=1}^C max_{Z_c}E_c$                                                                              （15）
 
+## 3.Result
 
+我们在两个指标上测试我们的方法在多人姿态检测：（1）MPII 人体多人数据集[2] (2)COCO2016人体关键点检测数据集[15]。这两个数据集收集的图像包含现实世界中很多挑战比如拥挤的人群，规模变化，遮挡，接触等等。我们的方法在首届COCO 2016关键点挑战上展示了最先进的技术[1]，并且超过以前MPII多人基准测试的最新结果。
+我们还提供运行时分析来量化系统的效率。 图10显示了我们算法的一些定性结果。
+
+![](assets/img/table1.png)
+
+*Table1.在MPII数据集上的结果。顶部：在测试集上的结果对比。中间:在整个数据集上的对比。没有比例搜索的测试表示为“（一个比例）”。*
+
+![](assets/img/table2.png)
+
+*表2.验证集上不同结构的比较*
+
+### 3.1.Results on the MPII Multi-Person Dataset
+
+为了比较MPII数据集，我们使用了工具包[22]测量了所有身体部位都基于PCKh的平均精度（mAP）阈值。表1比较了我们的方法和其他方法之间的在接近288个测试图像的相同子集[22]中mAP性能，和整个MPI测试集，以及在我们自己的验证集上的自我比较。除了这些措施，我们进行比较每个图像的平均推断/优化时间秒。对于288个图像子集，我们的方法优于以前最先进的自下而上的方法[11]超过8.5％mAP。值得注意的是，我们的推理时间是6倍指数幅度下降。我们在3.3节中介绍了更详细的运行时分析。对于整个MPII测试集，我们的没有比例搜索的方法已经优于以前的最先进的方法，即增加了绝对值为13％mAP。使用3比例搜索（×0.7，×1和×1.3）进一步将性能提高到75.6％mAP。该mAP与之前自下而上的方法比较表明我们使用PAF，用于关联身体部位新颖的特征表示的有效性。基于树形结构，我们基于完全连通的图切优化公式的贪婪的解析方法比直接使用整个图结构更准确。
+
+在表2中，我们显示了不同的比较结果.在我们的验证集上如Figure6所示的骨架结构，即，从MPII训练集中排除的343个图像。 我们基于完全连通的图形训练我们的模型，并进行比较选择所有边缘的结果（Figure 6b，大约由整数线性规划求解）和最小树边界（Figure 6c，大致由线性规划解决）
+
+![](assets/img/Figure7.png)
+
+Figure 7. MPII验证时不同PCKh阈值上的mAP曲线组。 （a）自我比较实验的mAP曲线。（b）PAF跨阶段的mAP曲线。*
+
+Figure 6d，通过在本文中所提出的贪婪算法求解）。 他们的相似表现表明使用最小边缘就足够了。 我们训练另一个模型只学习最小边缘以充分利用网络能力 - 本文提出的方法 - 即表示为Figure 6d（sep）。 该方法优于Figure -6c 甚至Figure 6b，同时保持效率。 原因是更少的连接（13个边的树木与91个边的树）相比更加容易收敛。
+
+Figure 7a显示了我们在验证集上的的消融分析。对于PCKh-0.5的阈值，使用PAF的结果
+优于使用中点表示的结果，具体来说，它比一个中点高出2.9％和2.3％高于两个中间点。编码
+人的位置和四肢方向信息的 PAF，能更好地区分常见的交叉。例如，重叠的胳膊。用未标记的人
+进行训练进一步提高了2.3％的表现，因为它避免了惩罚真正的积极预测在训练期间的损失。如果我们的解析算法使用真真实的关键点位置，我们可以获得一个88.3％的mAP。在Figure 7a中，我们使用GT检测进行解析的mAP
+在不同的PCKh阈值之间保持不变，因为没有本地化错误，因此。使用我们的关键点的GT连接检测达到81.6％的mAP。值得注意的是我们的基于PAF的解析算法实现了类似使用GT连接（79.4％对81.6％）的mAP。这表明
+基于PAF的解析在关联正确检测部分方面非常稳健。Figure 7b显示了跨阶段性能的比较。 mAP随着框架的不停优化单调增加。Figure 4显示了阶段预测的质量提高。
+
+### 3.2. Results on the COCO Keypoints Challenge
+
+COCO训练集包含超过10万人的实例标有超过100万个总关键点（即身体部分）。测试集包含“test-challenge”，“test-dev”和“test-standard”子集,每个子集大概有20K张图像。
+
+![](assets/img/table3.png)
+
+*Table 3. COCO 2016关键点挑战的结果。 上半部分：在测试集test-challenge中的结果。 下半部分：在test-dev的结果(只有最顶尖的方法的一些结果)。 $AP^{50}$是针对用于大规模人群，OKS = 0.5。$AP^L$是对于大规模人群来说的。*
+
+COCO评估定义对象关键点相似性（OKS）并使用平均平均精度（AP）超过10个OKS阈值作为主要竞争指标
+[1]。 OKS与对象中的IoU在目标检测中扮演的角色相同。 它是根据人的规模和预测点与GT点之间的距离来计算的。 Table 3显示挑战中顶级团队的结果。 值得注意的是我们的方法精度低于自上而下小规模人群的方法（$AP^M$） 原因是我们的方法必须处理更大的范围，图像中的所有人一次性获取。 相反，
+自上而下的方法可以针对区域面积更大的情况重新调整每个检测到的补丁
+，因此在较小的规模下退化更少。
+
+![](assets/img/table4.png)
+
+*Table4.在COCO验证集上做自我对比实验。*
+
+在表4中，我们报告了在COCO验证集的自我比较，即随机选择的1160个图像。如果我们使用GT边界框和单个
+人CPM [31]，我们可以实现上限使用CPM的自上而下方法，即62.7％的AP。如果我们使用最先进的物体探测器，单击多盒检测器（SSD）[16]，性能下降10％。该比较表明了自上而下方法的表现严重依赖人体探测器。相反，
+我们自下而上的方法达到了58.4％的AP。如果在我们解析的每个人的重新调整的区域上应用单个人CPM改进了结果，我们获得了2.6％的整体AP增长。注意我们只更新两种方法的预测估计，符合得很好，导致精确率和召回率精度提高。我们预计更大规模的搜索可以进一步改善我们自下而上的方法的表现。Figure 8显示了一个我们的方法在COCO验证中的错误分解。大多数误报来自本地化不精确，除此以外还有背景混乱。这表明在捕捉空间方面比识别身体部位出现的机率方面有更多提升空间。
+
+![](assets/img/Figure8.png)
+
+Figure 8.第3.2节（a），（b）和（c）中COCO验证的AP性能，以及3.3节（d）中的运行时分析。
+
+![](assets/img/Figure9.png)
+
+Figure 9.常见检测失败的情况：（a）罕见的姿势或外观，（b）缺失或错误的部件检测，（c）重叠部件，即部件检测由两个人共享，（d）与两个人的部分联系错误，（e-f）：对雕像或动物的误报
+
+### 3.3. Runtime Analysis
+
+为了分析我们方法的运行时性能，我们收集含有不同人数的视频。原本的帧大小为1080×1920，我们将其调整为368×654在测试期间调整到适合GPU内存大小。运行时分析是在配备一块NVIDIA GeForce GTX-1080 GPU的笔记本电脑上进行的。在Figure 8d中，我们使用人物检测和单人CPM作为自上而下的比较，它们运行时间大致与人数成正比。相比之下，我们自下而上的方法的运行时间随着人数的增加，增长相对缓慢。运行时间由两个主要部分组成：（1）CNN处理时间，其运行时复杂度为O（1），常量为不断变化的人数; （2）多人解析运行时复杂度为$O(n^2)$，其中n代表人数。但是，解析时间不会显着影响整体运行时间，因为它比CNN处理小两个数量级。例如，对于9个人来说，解析需要0.58毫秒，CNN需要99.6毫秒。我们的方法已经达到了一个19人的视频8.8 fps的效果。
+
+## 4. Discussion
+
+具有社会意义的时刻，比什么都重要，否则，迫使人们制作照片和视频。我们的照片集倾向于捕捉对于个人有意义的时刻：生日，婚礼，假期，朝圣，体育赛事，毕业典礼，家庭肖像等。为了使机器能够解释这些照片的重要性，
+他们需要了解图片中的人。实时具有这种感知个人和社会行为的人的能力的机器将能够作出反应甚至参与其中。
+在本文中，我们考虑了这一感知问题的关键组成部分：实时算法检测2D姿势图像中的多个人。我们提出了一个明确的非参数的通过编码人体四肢的位置和方向的关键点连接表示方法。第二，我们设计了一个身体部分检测和身体部分连接共同学习的一个架构。第三，我们证明了这一点贪婪的解析算法足以产生高质量甚至保持效率
+身体姿态的检测，即使在随着图像中人数的增加的情况下依旧能保持。我们在Figure 9中展示了代表性失败案例。我们已公开发布我们的[代码](https://github.com/ZheC/Realtime_Multi-Person_Pose_Estimation)（包括经过训练的模型）确保完全可复现并鼓励在这一领域未来的研究。
+
+## Acknowledgements
+
+我们感谢MPII作者的努力和COCO人类姿势数据集。 这些数据集构使得人体2D姿态检测成为可能。 这项研究
+由ONR Grants N00014-15-1-2358和N00014-14-1-0595提供支持。
+
+## References
+
+- [1]  MSCOCO keypoint evaluation metric  http://mscoco.org/dataset/##keypoints-eval 5, 6
+- [2]  M. Andriluka, L. Pishchulin, P. Gehler, and B. Schiele. 2D human pose estimation: new benchmark and state of the art analysis. In CVPR, 2014. 5
+- [3]  M. Andriluka, S. Roth, and B. Schiele. Pictorial structures
+  revisited: people detection and articulated pose estimation.
+  In CVPR, 2009. 1
+
+![](E:/%E5%B7%A5%E4%BD%9C%E5%AE%A4/%E8%AF%BE%E5%90%8E%E5%AD%A6%E4%B9%A0/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/ComputerVisionDoc/openpose/assets/img/Figure10.png)
+
+*Figure 10.包含视点和外观变化，遮挡，拥挤，接触和其他常见成像伪像的结果*
+
+- [4]  M. Andriluka, S. Roth, and B. Schiele. Monocular 3D pose estimation and tracking by detection. In CVPR, 2010. 1
+
+- [5]  V. Belagiannis and A. Zisserman. Recurrent human pose estimation.In 12th IEEE InternationalConference and Workshops on Automatic Face and Gesture Recognition (FG),2017. 1
+- [6]  A. Bulat and G. Tzimiropoulos. Human pose estimation via convolutional part heatmap regression. In ECCV, 2016. 1
+- [7]  X. Chen and A. Yuille. Articulated pose estimation by a graphical model with image dependent pairwise relations. InNIPS, 2014. 1
+- [8]  P. F. Felzenszwalb and D. P. Huttenlocher. Pictorial structures for object recognition. In IJCV, 2005. 1
+- [9]  G. Gkioxari, B. Hariharan, R. Girshick, and J. Malik. Using k-poselets for detecting people and localizing their keypoints. In CVPR, 2014. 1
+- [10]  K. He, X. Zhang, S. Ren, and J. Sun. Deep residual learning for image recognition. In CVPR, 2016. 1
+- [11]  E. Insafutdinov, L. Pishchulin, B. Andres, M. Andriluka, and B. Schiele. Deepercut: A deeper, stronger, and faster multiperson pose estimation model. In ECCV, 2016. 1, 5, 6
+- [12]  U. Iqbal and J. Gall. Multi-person pose estimation with local joint-to-person associations. In ECCV Workshops, Crowd Understanding, 2016. 1, 5
+- [13]  S. Johnson and M. Everingham. Clustered pose and nonlinear appearance models for human pose estimation. In BMVC,
+- [14] H. W. Kuhn. The hungarian method for the assignment problem. In Naval research logistics quarterly. Wiley Online Library,
+- [15]  T.-Y. Lin, M. Maire, S. Belongie, J. Hays, P. Perona, D. Ramanan, P. Dollar, and C. L. Zitnick. Microsoft COCO: com- mon objects in context. In ECCV, 2014. 5
+- [16]  W. Liu, D. Anguelov, D. Erhan, C. Szegedy, and S. Reed. Ssd: Single shot multibox detector. In ECCV, 2016. 6
+- [17]  A. Newell, K. Yang, and J. Deng. Stacked hourglass networks for human pose estimation. In ECCV, 2016. 1
+- [18]  W. Ouyang, X. Chu, and X. Wang. Multi-source deep learning for human pose estimation. In CVPR, 2014. 1
+- [19]  G. Papandreou, T. Zhu, N. Kanazawa, A. Toshev, J. Tompson, C. Bregler, and K. Murphy. Towards accurate multi-person pose estimation in the wild. arXiv preprint arXiv:1701.01779, 2017. 1, 6
+- [20]  T. Pfister, J. Charles, and A. Zisserman. Flowing convnets for human pose estimation in videos. In ICCV, 2015. 1
+- [21]  L. Pishchulin, M. Andriluka, P. Gehler, and B. Schiele. Poselet conditioned pictorial structures. In CVPR, 2013. 1
+- [22]  L. Pishchulin, E. Insafutdinov, S. Tang, B. Andres, M. Andriluka, P. Gehler, and B. Schiele. Deepcut: Joint subset partition and labeling for multi person pose estimation. In CVPR, 2016. 1, 5
+- [23]  L. Pishchulin, A. Jain, M. Andriluka, T. Thormahlen, and ¨B. Schiele. Articulated people detection and pose estimation:Reshaping the future. In CVPR, 2012. 1
+- [24]  V. Ramakrishna, D. Munoz, M. Hebert, J. A. Bagnell, and Y. Sheikh. Pose machines: Articulated pose estimation via inference machines. In ECCV, 2014. 1
+- [25]  D. Ramanan, D. A. Forsyth, and A. Zisserman. Strike a Pose: Tracking people by finding stylized poses. In CVPR, 2005.1
+- [26]  K. Simonyan and A. Zisserman. Very deep convolutionalnetworks for large-scale image recognition. In ICLR, 2015.2
+- [27]  M. Sun and S. Savarese. Articulated part-based model for joint object detection and pose estimation. In ICCV, 2011. 1
+- [28]  J. Tompson, R. Goroshin, A. Jain, Y. LeCun, and C. Bregler. Efficient object localization using convolutional networks. In CVPR, 2015. 1
+- [29] J. J. Tompson, A. Jain, Y. LeCun, and C. Bregler. Joint training of a convolutional network and a graphical model for human pose estimation. In NIPS, 2014. 1
+- [30]  A. Toshev and C. Szegedy. Deeppose: Human pose estimation via deep neural networks. In CVPR, 2014. 1
+- [31]  S.-E. Wei, V. Ramakrishna, T. Kanade, and Y. Sheikh. Convolutional pose machines. In CVPR, 2016. 1, 2, 3, 6
+- [32]  D. B. West et al. Introduction to graph theory, volume 2. Prentice hall Upper Saddle River, 2001. 4, 5
+- [33]  Y. Yang and D. Ramanan. Articulated human detection with
+  flexible mixtures of parts. In TPAMI, 2013. 1
 
 ## 笔记
 
@@ -188,6 +308,28 @@ $max_{Z}E = \sum _{c=1}^C max_{Z_c}E_c$                                         
 ## 资料
 
 [相关git仓库]()
+
+### mAP的概念
+
+1.对于某个类别C，在某一张图片上
+
+首先计算C在一张图片上的Precision=在一张图片上类别C识别正确的个数（也就是IoU>0.5）/一张图片上类别C的总个数
+
+![](assets/img/mAP1.jpg))
+
+
+
+2.依然对于某个类别C，可能在多张图片上有该类别，下面计算类别C的AP指数：
+
+AP=每张图片上的Precision求和/含有类别C的图片数目
+
+![](assets/img/mAP2.jpg)
+
+3.对于整个数据集，存在多个类别C1、C2、C3：mAP=上一步计算的所有类别的AP和/总的类别数目,相当于所有类别的AP的平均值
+
+![](assets/img/mAP3.jpg)
+
+
 
 ## 问题
 
@@ -211,3 +353,8 @@ PAF network.？？
 
 The reason is that the relationship between adjacent tree nodes is modeled explicitly by PAFs, but internally, the relationship between nonadjacent tree nodes is implicitly modeled by the CNN. This property
 emerges because the CNN is trained with a large receptive field, and PAFs from non-adjacent tree nodes also influence the predicted PAF？？？
+
+什么是scale search？
+
+GT points？？？
+
