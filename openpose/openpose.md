@@ -297,15 +297,7 @@ Figure 9.常见检测失败的情况：（a）罕见的姿势或外观，（b）
 - [33]  Y. Yang and D. Ramanan. Articulated human detection with
   flexible mixtures of parts. In TPAMI, 2013. 1
 
-## 笔记
-
-[框架结构](https://blog.csdn.net/qq_36165459/article/details/78322184)
-
-### Hungarian algorithm
-
-## 代码
-
-## 资料
+## 相关资料
 
 [相关git仓库]()
 
