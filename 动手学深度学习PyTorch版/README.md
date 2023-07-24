@@ -48,9 +48,10 @@ net[0].bias.data.fill_(0)
 
 # 定义神经网络的损失函数
 loss = nn.MSELoss() # L2范数
+# loss = nn.MSELoss(reduction='mean') # 小批量损失的平均值
+# loss = nn.SmoothL1Loss(reduction='mean') # 胡伯尔损失
 
-
-# 定义优化算法（这里用的小批量随机梯度下降算法）：reference: https://blog.csdn.net/weixin_39228381/article/details/108310520
+# 定义优化算法（这里用的小批量随机梯度下降算法）# todo_rzc: 啥意思
 trainer = torch.optim.SGD(net.parameters(), lr=0.03)
 
 # 定义训练几轮，每轮把所有数据训练一遍
@@ -58,7 +59,7 @@ num_epochs = 10
 for epoch in range(num_epochs):
     for X, y in data_iter:
         l = loss(net(X), y)
-        trainer.zero_grad() # trainer.zero_grad()用于将记录梯度的矩阵清零，网络进行训练的过程中，我们会存储两个矩阵：分别是params矩阵用于存储权重参数；以及params.grad用于存储梯度参数，reference: https://blog.csdn.net/qq_43369406/article/details/129740629
+        trainer.zero_grad() # todo_rzc: 啥意思
         l.backward()
         trainer.step()
     l = loss(net(features), labels)
@@ -69,6 +70,10 @@ w = net[0].weight.data
 print('w的误差：', true_w - w.reshape(true_w.shape))
 b = net[0].bias.data
 print('b的误差：', true_b - b)
+# print(dir(nn)) # 打印nn的函数
+# help(nn.BCELoss) # 打印用法
+
+# net[0].weight.grad,net[0].bias.grad # 访问梯度
 ```
 
 pytorch的其他优化器算法：（todo_rzc）: https://zhuanlan.zhihu.com/p/64885176
@@ -97,15 +102,297 @@ pytorch的其他优化器算法：（todo_rzc）: https://zhuanlan.zhihu.com/p/6
             - 按指数调整
             - 余弦退火调整等。
         4. 使用合适的正则化方法（todo_rzc: 什么是正则化：reference: https://blog.csdn.net/qq_43966129/article/details/123029320）：防止过拟合。在进行epoch调优时，我们通常使用L1或L2正则化来限制网络的权重，避免过拟合现象的发生。
+            - 早停技术是指在模型出现过拟合时（测试集表现开始下降）停止训练。
+            - 正则化技术是指通过向损失函数添加惩罚项来限制模型参数的大小，从而减少过拟合
         5. 增加数据集的多样性
         6. 合理选择损失函数：损失函数是评价模型优劣的一个重要指标，选用合适的损失函数可以使模型收敛更快并提高准确率。在epoch调优过程中，我们需要根据实际情况选择合适的损失函数。常用的损失函数：
             - 均方误差（MSE）
             - 交叉熵（Cross Entropy）
+                - 交叉熵损失函数定义了log函数。当模型预测概率为0时，log函数的值为负无穷。因此，在实际计算时，通常忽略预测概率接近0的样本对损失函数的贡献。这可能会导致模型欠拟合，并且在训练过程中难以收敛。
+                    - 解决方法是使用PyTorch框架中实现的交叉熵损失函数torch.nn.CrossEntropyLoss
             - 对数损失
 3. batch_size
 4. 其他：初始参数？（todo_rzc: 初始参数可能不算超参数？）
 
 
+- one-hot-encoding: 独热编码，假如有三个类别{猫，鸡，狗}，标签y将是一个三维向量，其中(1,0,0)表示猫，(0,1,0)表示鸡，(0,0,1)表示狗
+
+- 最大似然估计与损失函数：
+    - https://www.zhihu.com/question/27126057
+    - https://blog.csdn.net/qq_27690765/article/details/107530899
+- softmax损失函数
+
+- torchvision库
+```
+torchvision是一个用于计算机视觉任务的Python库。它提供了一些常用的数据集、模型架构、图像转换方法等工具，方便用户进行图像分类、目标检测、图像生成等计算机视觉任务的开发和实验。
+torchvision的主要功能包括：
+1. 数据集和数据加载器：torchvision提供了常用的计算机视觉数据集，如MNIST、CIFAR10、ImageNet等，以及数据加载器，方便用户加载和预处理数据。
+2. 图像转换方法：torchvision提供了一系列图像处理和转换方法，如裁剪、缩放、旋转、翻转等，方便用户对图像进行预处理和增强。
+3. 模型架构：torchvision提供了一些经典的计算机视觉模型架构，如AlexNet、VGG、ResNet等，用户可以直接使用这些模型进行图像分类、目标检测等任务。
+4. 图像工具：torchvision提供了一些图像处理的工具方法，如计算图像直方图、计算图像梯度等，方便用户进行图像分析和处理。
+总之，torchvision是一个方便用户进行计算机视觉任务开发和实验的Python库，提供了数据集、数据加载器、图像转换方法、模型架构等工具，加速了计算机视觉任务的开发过程。
+```
+transforms.ToTensor函数: torchvision库中的一个图像转换方法，用于将PIL图像或NumPy数组转换为PyTorch张量。
+```
+具体来说，transforms.ToTensor函数将图像数据从PIL图像或NumPy数组的形式转换为PyTorch张量的形式。在转换过程中，它会对图像进行归一化操作，将像素值从0-255的整数转换为0-1之间的浮点数，并且调整图像的维度顺序，使得通道维度在前，高度和宽度维度在后。
+
+这个转换方法通常在数据预处理的过程中使用，以便将图像数据转换为PyTorch模型所需的格式。对于大多数计算机视觉任务，如图像分类、目标检测等，输入数据需要是PyTorch张量的形式，因此使用transforms.ToTensor可以将图像数据转换为可用于训练或推理的格式。
+
+以下是使用transforms.ToTensor的示例代码：
+
+import torchvision.transforms as transforms
+
+# 转换PIL图像
+transform = transforms.ToTensor()
+pil_image = Image.open("image.jpg")
+tensor_image = transform(pil_image)
+
+# 转换NumPy数组
+numpy_array = np.array(pil_image)
+tensor_image = transform(numpy_array)
+
+上述代码中，使用transforms.ToTensor将PIL图像和NumPy数组分别转换为PyTorch张量tensor_image
+```
 
 
 
+
+pytorch tensor 取元素的方法：
+```
+在PyTorch中，可以使用索引操作来获取张量中的元素。以下是一些常见的操作：
+
+1. 使用整数索引获取单个元素：
+import torch
+
+x = torch.tensor([1, 2, 3, 4, 5])
+print(x[0]) # 输出: 1
+
+2. 使用切片操作获取多个元素：
+import torch
+
+x = torch.tensor([1, 2, 3, 4, 5])
+print(x[1:4]) # 输出: tensor([2, 3, 4])
+
+3. 使用逗号分隔索引获取多维张量中的元素：
+import torch
+
+x = torch.tensor([[1, 2, 3], [4, 5, 6]])
+print(x[1, 2]) # 输出: 6
+
+4. 使用布尔索引获取满足条件的元素：
+import torch
+
+x = torch.tensor([1, 2, 3, 4, 5])
+mask = x > 3
+print(x[mask]) # 输出: tensor([4, 5])
+
+5. 使用torch.gather函数按索引获取元素：
+import torch
+
+x = torch.tensor([[1, 2, 3], [4, 5, 6]])
+indices = torch.tensor([[0, 2], [1, 1]])
+print(torch.gather(x, 1, indices)) # 输出: tensor([[1, 3], [5, 5]])
+
+这些操作可以帮助你在PyTorch中获取张量中的元素。
+
+6. 使用下标取
+
+x1 = torch.tensor([[1, 2, 3], [4, 5, 6]])
+x1[[0, 1], [1, 1]]
+print(x1) # 输出：tensor([2, 5])
+```
+
+从0实现softmax回归，图像分类:
+
+```
+class Animator:  #@save
+    """在动画中绘制数据"""
+    def __init__(self, xlabel=None, ylabel=None, legend=None, xlim=None,
+                 ylim=None, xscale='linear', yscale='linear',
+                 fmts=('-', 'm--', 'g-.', 'r:'), nrows=1, ncols=1,
+                 figsize=(3.5, 2.5)):
+        # 增量地绘制多条线
+        if legend is None:
+            legend = []
+        d2l.use_svg_display()
+        self.fig, self.axes = d2l.plt.subplots(nrows, ncols, figsize=figsize)
+        if nrows * ncols == 1:
+            self.axes = [self.axes, ]
+        # 使用lambda函数捕获参数
+        self.config_axes = lambda: d2l.set_axes(
+            self.axes[0], xlabel, ylabel, xlim, ylim, xscale, yscale, legend)
+        self.X, self.Y, self.fmts = None, None, fmts
+
+    def add(self, x, y):
+        # 向图表中添加多个数据点
+        if not hasattr(y, "__len__"):
+            y = [y]
+        n = len(y)
+        if not hasattr(x, "__len__"):
+            x = [x] * n
+        if not self.X:
+            self.X = [[] for _ in range(n)]
+        if not self.Y:
+            self.Y = [[] for _ in range(n)]
+        for i, (a, b) in enumerate(zip(x, y)):
+            if a is not None and b is not None:
+                self.X[i].append(a)
+                self.Y[i].append(b)
+        self.axes[0].cla()
+        for x, y, fmt in zip(self.X, self.Y, self.fmts):
+            self.axes[0].plot(x, y, fmt)
+        self.config_axes()
+        display.display(self.fig)
+        display.clear_output(wait=True)
+```
+
+```
+# 用softmax是因为要用概率评估分类
+# 定义超参
+batch_size = 256
+lr = 0.1
+num_epochs = 10
+
+# 加载数据
+def get_dataloader_workers():
+    return 4
+
+import torch
+import torchvision
+from torch.utils import data
+from torchvision import transforms # 做图像变换
+from IPython import display
+from d2l import torch as d2l
+def load_data_fashion_mnist(batch_size, resize=None):
+    trans = [transorms.ToTensor()]
+    if resize:
+        trans.insert(0, transforms.Resize(resize)) # 其实是transform的多个步骤，先toTensor，然后resize
+        trans = transforms.Compose(trans) # 组合之前的步骤
+        mnist_train = torchvision.datasets.FashionMNIST(# tran=True,下载的数据命名会加上train
+            root="../data", train=True, transform=trans, download=True
+        )
+        mnist_test = torchvision.datasets.FashionMNIST(
+            root="../data", train=False, transform=trans,download=True
+        )
+        return (data.DataLoader(mnist_train, batch_size, shuffle=True, num_workers=get_dataloader_workers()),
+               data.DataLoader(mnist_test, batch_size, shuffle=False, num_workers=get_dataloader_workers())
+               )
+
+num_inputs = 784 # 每个图像大小 28 * 28= 784像素，可以看做784长度的向量
+num_outputs = 10 # 10个类别
+# 定义初始权重
+W=torch.normal(0, 0.01, size=(num_inputs, num_outputs), requires_grad=True) # 权重即为784 * 10矩阵
+b=torch.zeros(num_outputs, requires_grad=True) # 偏置为1 * 10 行向量
+# 定义神经网络模型
+def softmax(X):
+    X_exp = torch.exp(X)
+    partition = X_exp.sum(1, keepdim=True) # 每行求和
+    return X_exp / partition # 这里应用到了广播机制
+def net(X):
+    return softmax(torch.matmul(X.reshape((-1, W.shape[0])), W) + b)
+# 定义损失函数
+def cross_entropy(y_hat, y):
+    return - torch.log(y_hat[range(len(y_hat)), y])
+def accuracy(y_hat, y):
+    """计算预测正确的数量"""
+    if len(y_hat.shape) > 1 and y_hat.shape[1] > 1:
+        y_hat = y_hat.argmax(axis = 1)
+    cmp = y_hat.type(y.dtype) == y
+    return float(cmp.type(y.dtype).sum())
+def evaluate_accuracy(net, data_iter):
+    """计算在指定数据集上模型的精度"""
+    if isinstance(net, torch.nn.Module):
+        net.eval() # 将模型设置为评估模式,停止反向传播
+    metric = Accumulator(2)
+    with torch.no_grad():#,停止反向传播
+        for X, y in data_iter:
+            metric.add(accuracy(net(X), y), y.numel())
+    return metric[0] / metric[1]
+class Accumulator:
+    def __init__(self, n):
+        self.data = [0.0] * n
+    def add(self, *args):
+        self.data = [a + float(b) for a, b in zip(self.data, args)]
+    def reset(self):
+        self.data = [0.0] * len(self.data)
+    def __getitem__(self, idx):
+        return self.data[idx]
+# 定义优化算法
+# 定义训练函数
+def train_epoch_ch3(net, train_iter, loss, updater):
+    """训练模型一轮"""
+    # 将模型设置为训练模式
+     if isinstance(net, torch.nn.Module):
+        net.train()
+    # 训练损失总和、训练准确度总和、样本数
+    metric = Accumulator(3)
+    for X, y in train_iter:
+        # 计算梯度并更新参数
+        y_hat = net(X)
+        l = loss(y_hat, y)
+        if isinstance(updater, torch.optim.Optimizer):
+            # 使用pytorch内置的优化器和损失函数
+            updater.zero_grad()
+            l.mean().backward()
+            updater.step()
+        else:
+            # 使用定制的优化器和损失函数
+            l.sum().backward()
+            updater(X.shape[0])
+        metric.add(float(l.sum()), accuracy(y_hat, y), y.numel())
+    # 返回训练损失和训练精度
+    return metric[0] / metric[2], metric[1] / metric[2]
+def train_ch3(net, train_iter, test_iter, loss, num_epochs, updater):
+    """训练模型多轮"""
+    animator = Animator(xlabel='epoch', xlim=[1, num_epochs], ylim=[0.3, 0.9],
+                        legend=['train loss', 'train acc', 'test acc'])
+    for epoch in range(num_epochs):
+        train_metrics = train_epoch_ch3(net, train_iter, loss, updater)
+        test_acc = evaluate_accuracy(net, test_iter)
+        animator.add(epoch + 2, train_metrics + (test_acc,))
+    train_loss, train_acc = train_metrics
+
+def updater(batch_size):
+    return d2l.sgd([W, b], lr, batch_size)
+train_ch3(net, train_iter, test_iter, cross_entropy, num_epochs, updater)
+```
+```
+# 预测，评估准确率
+def predict_ch3(net, test_iter, n=6):  #@save
+    """预测标签（定义见第3章）"""
+    for X, y in test_iter:
+        break
+    trues = d2l.get_fashion_mnist_labels(y)
+    preds = d2l.get_fashion_mnist_labels(net(X).argmax(axis=1))
+    titles = [true +'\n' + pred for true, pred in zip(trues, preds)]
+    d2l.show_images(
+        X[0:n].reshape((n, 28, 28)), 1, n, titles=titles[0:n])
+
+predict_ch3(net, test_iter)
+```
+
+softmax的简化实现：
+```
+import torch
+from torch import nn
+from d2l import torch as d2l
+# 定义超参数
+batch_size = 256
+num_epochs = 10
+train_iter, test_iter = d2l.load_data_fashion_mnist(batch_size)
+# 定义展平层来调整网络输入的形状
+net = nn.Sequential(nn.Flatten(), nn.Linear(784, 10))
+# 定义初始权重
+def init_weights(m):
+    if type(m) == nn.Linear:
+        nn.init.normal_(m.weight, std=0.01)
+net.apply(init_weights)
+# 定义损失函数
+loss = nn.CrossEntropyLoss(reduction='none')
+# 定义优化算法
+trainer = torch.optim.SGD(net.parameters(), lr=0.1)
+# 训练
+d2l.train_ch3(net, train_iter, test_iter, loss, num_epochs, trainer)
+# 预测
+d2l.predict_ch3(net, test_iter)
+```
