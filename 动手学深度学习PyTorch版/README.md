@@ -11,7 +11,16 @@
                             - Kaggle比赛
                             - 预处理技巧：1. 缺失值替换为平均值。2. 将特征重新缩放到零均值和单位方差来标准化数据（x-均值除以方差）3. 对于离散的分类，可以使用one-hot编码
                                 - 卷积：提取输入的结构信息，**降低神经网络参数数量**。在卷积的背景下，引入了以下概念：通道（图像RGB三通道）。卷积核（本质也是权重）。填充（处理边界的卷积计算，增加输出的宽高）。步幅（减少参数，减低输出的宽高，提高泛化能力）。1x1卷积层（用于改变通道数，控制模型复杂性）。汇聚层(也叫池化层，降低层的宽高，聚合信息，一般有最大汇聚和平均汇聚)
-                                    - 卷积神经网络
+                                    - 卷积神经网络（详细代码抄一下书上的即可）
+                                        - LeNet:先卷积->汇聚->全连接
+                                            - AlexNet: 比LeNet增加了更多的卷积层和参数，来拟合更大的数据集
+                                            - VGG: 提出了VGG块的概念
+                                            - NiN块: 由一个卷积层和多个1x1卷积层组成。去掉了最后的全连接，替换为了全局平均汇聚，所有位置求和取平均
+                                            - GoogleNet: 提出了Inception块，相当于一个有4条路径的子网络，不同的子网络拥有不同窗口形状的卷积层和最大汇聚层并行提取信息。
+                                            - 批量规范化：加速网络的收敛和拟合
+                                                - ResNet: 保证了深层网络，新添加层可以提升网络性能
+                                                - DenseNet: 改良版的ResNet，ResNet的逻辑扩展 
+
 
 # 基础概念
 
@@ -50,6 +59,14 @@
             - 对数损失
 3. batch_size
 4. 其他：初始参数？（todo_rzc: 初始参数可能不算超参数？）
+5. 权重初始化的方法
+    1. torch.nn.init.uniform_(tensor, a=0, b=1) 服从均匀分布U(a, b)
+    2. torch.nn.init.normal_(tensor, mean=0, std=1) 服从~ 正态分布N(mean,std)
+    3. torch.nn.init.constant_(tensor, val) 初始化为常数
+    4. torch.nn.init.xavier_uniform_(tensor, gain=1) 均匀分布 ~ U(−a,a)Xavier基本思想是通过网络层时，输入和输出的方差相同，包括前向传播和后向传播。 看起来是搭配sigmoid激活函数使用的。reference: https://blog.csdn.net/luoxuexiong/article/details/95772045
+    5. torch.nn.init.xavier_normal_(tensor, gain=1) 正态分布~N(0,std)
+
+
 
 
 - one-hot-encoding: 独热编码，假如有三个类别{猫，鸡，狗}，标签y将是一个三维向量，其中(1,0,0)表示猫，(0,1,0)表示鸡，(0,0,1)表示狗
