@@ -406,5 +406,8 @@ d2l.predict_ch3(net, test_iter)
 - [ ] Natural Speech2论文
 - [ ] InstructGPT论文
 
+
+reference: 讲word2vec的通俗易懂的文章：https://zhuanlan.zhihu.com/p/114538417
+
 # 代码技巧
 [代码技巧](./代码技巧.md)
